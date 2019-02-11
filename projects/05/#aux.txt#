@@ -1,0 +1,8 @@
+    Or(a=JMP1, b=JMP2, out=J1);
+    Or(a=J1, b=JMP3, out=J2);
+    Or(a=J2, b=JMP4, out=J3);
+    Or(a=J3, b=JMP5, out=J4);
+    Or(a=J4, b=JMP6, out=J5);
+    //Or(a=J5, b=JMP7, out=JMP);
+    
+    //

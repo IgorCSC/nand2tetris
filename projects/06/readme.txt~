@@ -1,0 +1,4 @@
+How to use the assembler
+
+Syntax (via cl):
+pyhton theAssembler.py --FN [path to asm file]

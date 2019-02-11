@@ -1,0 +1,155 @@
+def instruction(word):
+    if word[0]=='@':
+        return 'A'
+    elif word[0]!='/':
+        return 'C'
+    else:
+        return 'COMMENTARY'
+
+def parse_A(word):
+    return bin(int(word[1:]))[2:]
+    
+def parse_C(word):
+    comms, cw = {'dest':'null', 'comp':'null', 'jump':'null'}, ''  #will store commands
+    isJump    = False #key that stores wheter there is a jump command
+    for l in word:
+        if l=='=':
+            comms['dest']=cw
+            cw = ''
+        elif l==';':
+            isJump = True
+            comms['comp']=cw
+            cw = ''
+        else:
+            cw = cw + l
+    if cw != '' and isJump:
+        comms['jump']=cw
+    elif cw != '':
+        comms['comp']=cw
+        comms['jump']='null'
+    else:
+        comms['jump']='null'
+    return comms
+
+def parse(word):
+    instr = instruction(word)
+    if instr == 'A':
+        return (parse_A(word), instr)
+    elif instr == 'C':
+        return (parse_C(word), instr)
+    else:
+        return 'null'
+
+def code_A(valueA):
+    while len(valueA)<16:
+        valueA = '0' + valueA
+    return valueA
+
+def code_C(commands, cTable): 
+    acbits   = cTable['comp'][commands['comp']]
+    jumpbits = cTable['jump'][commands['jump']]
+    dbits    = cTable['dest'][commands['dest']]
+
+    #print(commands)
+    #print(acbits, jumpbits, dbits)    # //just for debugging
+
+    code = '111'+acbits+dbits+jumpbits
+    
+    return code
+    
+    
+def code(instruction, specification, cTable):
+    if specification == 'A':
+        return code_A(instruction)
+    elif specification =='C':
+        return code_C(instruction, cTable)
+    else:
+        return 'NULL' #erro - nao reconheceu como nenhuma.
+
+    
+
+cTable = {'dest':{'null':'000', 'M':'001','D':'010', 'MD':'011', 'A':'100', 'AM':'101', 'AD':'110', 'AMD':'111'}, 'jump':{'null':'000', 'JGT':'001', 'JEQ':'010', 'JGE':'011', 'JLT':'100', 'JNE':'101', 'JLE':'110', 'JMP':'111'}, 'comp':{'0':'0101010', '1':'0111111', '-1':'0111010', 'D':'0001100', 'A':'0110000', '!D':'0001101', '!A':'0110001', '-D':'0001111', '-A':'0110011', 'D+1':'0011111', 'A+1':'0110111', 'D-1':'0001110', 'A-1':'0110010', 'D+A':'0000010', 'D-A':'0010011', 'A-D':'0000111', 'D&A':'0000000', 'D|A':'0010101', 'M':'1110000', '!M':'1110001', '-M':'1110011', 'M+1':'1110111', 'M-1':'1110111', 'D+M':'1000010', 'D-M':'1010011', 'M-D':'1000111', 'D&M':'1000000', 'D|M':'1010101'}}
+
+
+'''assembler routine'''
+
+def codeExtract(text):
+    '''returns a list with all the assembly commands'''
+    l = []
+    for line in text:
+        if line[0] != '/' and line[0] != '\n':
+            l.append(line.split()[0])
+    return l
+
+def codeTransl(commandList, cTable):
+    '''returns a list with the parsed commands'''
+    l = []
+    for item in commandList:
+        commInstr = parse(item)
+
+        #print(item)
+        #print(commInstr)
+        
+        binary    = code(commInstr[0], commInstr[1], cTable)
+        l.append(binary)
+    return l
+
+def codeExport(fileName, instructionList):
+    '''export the code to an hack file'''
+    hack = open(fileName, 'w')
+    for line in instructionList:
+        hack.write(line)
+        hack.write('\n')
+    hack.close()
+
+
+
+'''binary testing'''       
+
+def powerTwo(number):
+    '''verifies is a number is a power of two. Returns the power, if it is, or
+    -1 if it isn't'''
+
+    n,power=number,0
+
+    if n == 0:        #if 0
+        return -1
+    elif n == 1:
+        return 0
+    
+    while n != 1:
+        if n%2!=0:
+            return -1
+        else:
+            n=n//2
+            power+=1
+    return power
+
+
+
+def decimalBinary(number):
+    '''converts a number written in decimal into one written in binary'''
+
+    if number == 0:     #ajuste feio para os primeiros casos
+        return '0'
+    elif number == 1:
+        return '1' 
+    
+    no, twoPot = number, []           #Fatora os numeros em pots de 2
+    for i in range(number,0,-1):
+        power = powerTwo(i)
+        if power>-1 and i<=no:
+            twoPot.append(power)
+            no -= i
+            
+    binary, currentPower = '', 0
+    
+    for p in twoPot[::-1]:            #Reconstroi o numero em binario a partir da lista das potencias
+        while currentPower < p:
+            binary = '0'+binary
+            currentPower += 1
+        binary = '1' + binary
+        currentPower +=1
+        
+    return binary     
+            

@@ -1,0 +1,8 @@
+Bit       OK
+Register  OK
+RAM8      OK
+RAM64     OK
+RAM512    OK
+RAM4k     OK
+RAM16k    OK
+PC        OK

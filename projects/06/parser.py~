@@ -1,0 +1,7 @@
+import argparse
+
+myParser = argparse.ArgumentParser(description='numbers')
+
+myParser.add_argument('integers', metavar='N', type=int, nargs='+', help='ola')
+
+myParser.parse_args(['1])
